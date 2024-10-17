@@ -29,10 +29,10 @@ def generate_config(input_dir, output_conf):
             for line in custom:
                 config_file.write(f"{"DOMAIN-SUFFIX" if "." in line else "DOMAIN-KEYWORD"},{line.strip()},PROXY\n")
 
-
-        with open(join(input_dir, "ipsum.lst"), "r") as ip_networks:
-            for line in ip_networks:
-                config_file.write(f"IP-CIDR,{line.strip()},PROXY\n")
+        # ignore since too many
+        # with open(join(input_dir, "ipsum.lst"), "r") as ip_networks:
+        #     for line in ip_networks:
+        #         config_file.write(f"IP-CIDR,{line.strip()},PROXY\n")
 
 
         config_file.writelines(("\n\n# Финальное правило маршрутизации\n", "FINAL,DIRECT\n"))
