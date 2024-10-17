@@ -1,0 +1,45 @@
+name: Update Generated File
+
+on:
+  push:
+    branches:
+      - main  # Adjust the branch if needed
+    repositories:
+      - lrlunin/Re-filter-lists  # Trigger when this repository is updated
+
+jobs:
+  generate-file:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout shadowrocket-config repository
+      uses: actions/checkout@v3
+
+    - name: Clone Re-filter-lists repository
+      run: |
+        git clone https://github.com/lrlunin/Re-filter-lists.git
+        REPO_NAME=$(basename Re-filter-lists)
+        echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+        CONFIG_NAME=lunin_2.conf
+        echo "CONFIG_NAME=$CONFIG_NAME" >> $GITHUB_ENV 
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Run Python script
+      run: python generate_conf.py "$REPO_NAME" "$CONFIG_NAME"
+
+    - name: Configure git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit and push changes
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        git add "$CONFIG_NAME"
+        git commit -m "Update generated file"
+        git push https://$GH_TOKEN@github.com/lrlunin/shadowrocket-config.git
