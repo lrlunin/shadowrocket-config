@@ -1,11 +1,8 @@
 name: Update Generated File
 
 on:
-  push:
-    branches:
-      - main  # Adjust the branch if needed
-    repositories:
-      - lrlunin/Re-filter-lists  # Trigger when this repository is updated
+  repository_dispatch:
+    types: [re_filter_lists_update]
 
 jobs:
   generate-file:
