@@ -40,17 +40,16 @@ jobs:
         git add "$CONFIG_NAME"
         git commit -m "Update generated file"
         git push https://$GH_TOKEN@github.com/lrlunin/shadowrocket-config.git
-        {
-          echo 'git_diff<<EOF'
-          git diff HEAD^ HEAD -U0 | grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)'
-          echo EOF
-        } >> $GITHUB_ENV
+        # select the lines that start with + or -, not with --- or +++, and encode the output as a URI
+        echo "git_diff=$(git diff HEAD^ HEAD -U0 | grep '^[+-]' | grep -Ev '^(--- |\+\+\+ )' | jq -sRr @uri)" >> $GITHUB_OUTPUT
 
     - name: Report to the telegram group
       env:
         TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
         CHAT_ID: ${{ secrets.CHAT_ID }}
+        GIT_DIFF: ${{ steps.commit_step.outputs.git_diff }}
       run: |
         curl -s -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
           -d "chat_id=$CHAT_ID" \
-          -d "text="Конфигурация для `lunin_2.conf` в Shadowrocket обновлена:\n```\n${{ steps.commit_step.outputs.git_diff }}```\n\nПожалуйста нажмите пункт Update."
+          -d "text=Конфигурация для <code>lunin_2.conf</code> в Shadowrocket обновлена. Изменения:%0A%0A<pre>$GIT_DIFF</pre>%0A%0AПожалуйста выберите пункт <code>Update</code> для этого конфигурационного файла." \
+          -d "parse_mode=html"
