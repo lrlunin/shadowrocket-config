@@ -7,7 +7,9 @@ on:
 jobs:
   generate-file:
     runs-on: ubuntu-latest
-
+    env:
+      TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
     steps:
     - name: Checkout shadowrocket-config repository
       uses: actions/checkout@v3
@@ -34,9 +36,19 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Commit and push changes
+      id: commit_step
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         git add "$CONFIG_NAME"
         git commit -m "Update generated file"
         git push https://$GH_TOKEN@github.com/lrlunin/shadowrocket-config.git
+        echo "git_diff=$(git diff HEAD^ HEAD)" >> $GITHUB_ENV
+    - name: Report to the telegram group
+      env:
+        MESSAGE_ID: ${{ env.MESSAGE_ID }}
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
+          -d "chat_id=$CHAT_ID" \
+          -d "text="Конфигурация для Shadowrocket обновлена:\n```\n${{ env.git_diff }}```\n\nПожалуйста нажмите пункт Update."
