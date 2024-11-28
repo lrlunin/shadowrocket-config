@@ -10,3 +10,7 @@
 2. `ooni_domains.lst`
 3. `user_custom.lst`
 и список IP подсетей из `ipsum.lst` и сохраняет его как `lunin_2.conf`.
+
+## Добавление новых адресов
+Создайте Issue или Pull-request в [lrlunin/Re-filter-lists
+](https://github.com/lrlunin/Re-filter-lists) или напишите мне в tg.
